@@ -639,33 +639,20 @@ def should_send_email(state):
 
 # ---------------------- DATA COLLECTION FUNCTIONS ----------------------
 def google_search(query, num=5):
-    """Search using RapidAPI Real-Time Web Search"""
-    if not RAPIDAPI_KEY:
-        print("⚠️  RapidAPI key not configured, using DuckDuckGo fallback")
-        return duckduckgo_search(query, num)
-    
-    headers = {
-        'x-rapidapi-host': 'real-time-web-search.p.rapidapi.com',
-        'x-rapidapi-key': RAPIDAPI_KEY
-    }
-    params = {
-        'q': query,
-        'num': num,
-        'gl': 'us',
-        'hl': 'en'
-    }
+    """Search using DuckDuckGo (free, no rate limits)"""
+    results = []
     try:
-        r = requests.get('https://real-time-web-search.p.rapidapi.com/search', 
-                        headers=headers, params=params, timeout=15)
-        data = r.json()
-        if "error" in data:
-            print(f"⚠️  RapidAPI error: {data['error']}")
-            return duckduckgo_search(query, num)
-        results = data.get("data", [])
-        return results[:num] if results else []
+        from ddgs import DDGS
+        with DDGS() as ddgs:
+            for r in ddgs.text(query, max_results=num):
+                results.append({
+                    "title": r.get("title", ""),
+                    "link": r.get("href", ""),
+                    "snippet": r.get("body", "")
+                })
     except Exception as e:
-        print(f"⚠️  RapidAPI error: {e}")
-        return duckduckgo_search(query, num)
+        print(f"⚠️  Search error: {e}")
+    return results
 
 def is_future_date(date_str):
     try:
