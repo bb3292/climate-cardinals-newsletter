@@ -7,16 +7,11 @@ Runs daily, accumulates data, sends email on Monday, then resets
 
 import os
 import sys
-import subprocess
 import json
 from datetime import datetime, timedelta
 from pathlib import Path
 
-# Install dependencies first
-subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", 
-                      "requests", "beautifulsoup4", "lxml", "html5lib", "pandas", "python-dateutil", "duckduckgo-search"])
-
-# Now import
+# Import dependencies
 import requests
 import pandas as pd
 from bs4 import BeautifulSoup
