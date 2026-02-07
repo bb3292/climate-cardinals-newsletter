@@ -744,9 +744,14 @@ def collect_data(keywords, mode="future", max_queries=20):
         queries_used += 1
         
         for item in items:
-            title = item.get("title", "—")
-            link = item.get("link", "#")
-            snippet = item.get("snippet", "")
+            # Handle both Google and RapidAPI response formats
+            if isinstance(item, dict):
+                title = item.get("title") or item.get("name", "—")
+                link = item.get("link") or item.get("url", "#")
+                snippet = item.get("snippet") or item.get("description", "")
+            else:
+                continue
+            
             domain = domain_from_url(link)
             date_info = extract_date(link, snippet, mode=mode)
             
@@ -778,9 +783,12 @@ def collect_experts(queries, max_queries=15):
         queries_used += 1
         
         for item in items:
-            title = item.get("title", "")
-            link = item.get("link", "#")
-            snippet = item.get("snippet", "")
+            if not isinstance(item, dict):
+                continue
+            
+            title = item.get("title") or item.get("name", "")
+            link = item.get("link") or item.get("url", "#")
+            snippet = item.get("snippet") or item.get("description", "")
             
             if not name_pat.match(title):
                 continue
