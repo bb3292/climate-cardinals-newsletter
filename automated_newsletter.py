@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Climate Cardinals - Automated Weekly Newsletter System
-FREE VERSION - Uses RapidAPI + DuckDuckGo (no Google API needed)
+FREE VERSION - Uses DuckDuckGo (no API keys needed)
 Runs daily, accumulates data, sends email on Monday, then resets
 """
 
@@ -18,13 +18,15 @@ try:
     import pandas as pd
     from bs4 import BeautifulSoup
     from dateutil import parser
+    from ddgs import DDGS
 except ImportError:
     subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", 
-                          "requests", "beautifulsoup4", "lxml", "html5lib", "pandas", "python-dateutil"])
+                          "requests", "beautifulsoup4", "lxml", "html5lib", "pandas", "python-dateutil", "duckduckgo-search"])
     import requests
     import pandas as pd
     from bs4 import BeautifulSoup
     from dateutil import parser
+    from ddgs import DDGS
 
 import re
 import csv
@@ -36,9 +38,6 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 # ---------------------- CONFIGURATION ----------------------
-# Load from environment variables or config file
-RAPIDAPI_KEY = os.getenv("RAPIDAPI_KEY", "")  # Get free key from rapidapi.com
-
 # Email configuration
 SMTP_SERVER = os.getenv("SMTP_SERVER", "smtp.gmail.com")
 SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
