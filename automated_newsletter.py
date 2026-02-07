@@ -206,6 +206,56 @@ def write_csv(name, data):
         writer.writerows(data)
     print(f"Saved {name} ({len(data)} rows)")
 
+# ---------------------- EMAIL ----------------------
+def send_email(grants_data, events_data, csr_data, experts_data):
+    """Send newsletter email using premium template - only on Monday"""
+    # Only send on Monday (weekday 0 = Monday)
+    if datetime.now().weekday() != 0:
+        print(f"⏭️  Not Monday (today is {datetime.now().strftime('%A')}), skipping email send")
+        return
+    
+    if not SENDER_EMAIL or not SENDER_PASSWORD or not RECIPIENT_EMAILS:
+        print("⚠️  Email config missing, skipping send")
+        return
+    
+    # Import template generator
+    from email_template import generate_email_html
+    
+    # Convert to DataFrames and rename columns for template
+    grants_df = pd.DataFrame(grants_data) if grants_data else pd.DataFrame()
+    events_df = pd.DataFrame(events_data) if events_data else pd.DataFrame()
+    csr_df = pd.DataFrame(csr_data) if csr_data else pd.DataFrame()
+    experts_df = pd.DataFrame(experts_data) if experts_data else pd.DataFrame()
+    
+    # Rename Organization to Domain for template compatibility
+    if not grants_df.empty:
+        grants_df = grants_df.rename(columns={'Organization': 'Domain'})
+    if not events_df.empty:
+        events_df = events_df.rename(columns={'Organization': 'Domain'})
+    if not csr_df.empty:
+        csr_df = csr_df.rename(columns={'Organization': 'Domain'})
+    
+    # Generate HTML
+    html_content = generate_email_html(experts_df, grants_df, events_df, csr_df)
+    
+    # Send email
+    try:
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = f"🌍 Climate Cardinals Newsletter - {TODAY}"
+        msg["From"] = SENDER_EMAIL
+        msg["To"] = ", ".join(RECIPIENT_EMAILS)
+        
+        msg.attach(MIMEText(html_content, "html"))
+        
+        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+            server.starttls()
+            server.login(SENDER_EMAIL, SENDER_PASSWORD)
+            server.sendmail(SENDER_EMAIL, RECIPIENT_EMAILS, msg.as_string())
+        
+        print(f"✅ Email sent to {len(RECIPIENT_EMAILS)} recipients")
+    except Exception as e:
+        print(f"❌ Email error: {e}")
+
 # ---------------------- MAIN ----------------------
 def main():
     print("=" * 70)
@@ -224,6 +274,9 @@ def main():
     write_csv("experts.csv", experts_data)
     
     print(f"\n✅ CSVs saved to: {OUTPUT_FOLDER.resolve()}")
+    
+    # Send email
+    send_email(grants_data, events_data, csr_data, experts_data)
     
     # Display summary
     pd.set_option("display.max_colwidth", 120)
