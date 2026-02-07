@@ -16,7 +16,7 @@ import requests
 import pandas as pd
 from bs4 import BeautifulSoup
 from dateutil import parser
-from ddgs import DDGS
+from duckduckgo_search import DDGS
 
 import re
 import csv
