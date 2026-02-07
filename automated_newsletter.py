@@ -639,19 +639,33 @@ def should_send_email(state):
 
 # ---------------------- DATA COLLECTION FUNCTIONS ----------------------
 def google_search(query, num=5):
-    """Search using Google Custom Search API"""
-    params = urlencode({"key": API_KEY, "cx": CX_ID, "q": query, "num": num})
-    url = f"https://www.googleapis.com/customsearch/v1?{params}"
+    """Search using RapidAPI Real-Time Web Search"""
+    if not RAPIDAPI_KEY:
+        print("⚠️  RapidAPI key not configured, using DuckDuckGo fallback")
+        return duckduckgo_search(query, num)
+    
+    headers = {
+        'x-rapidapi-host': 'real-time-web-search.p.rapidapi.com',
+        'x-rapidapi-key': RAPIDAPI_KEY
+    }
+    params = {
+        'q': query,
+        'num': num,
+        'gl': 'us',
+        'hl': 'en'
+    }
     try:
-        r = requests.get(url, timeout=15)
+        r = requests.get('https://real-time-web-search.p.rapidapi.com/search', 
+                        headers=headers, params=params, timeout=15)
         data = r.json()
         if "error" in data:
-            print(f"API Error: {data['error'].get('message', 'Unknown')}")
-            return []
-        return data.get("items", [])
+            print(f"⚠️  RapidAPI error: {data['error']}")
+            return duckduckgo_search(query, num)
+        results = data.get("data", [])
+        return results[:num] if results else []
     except Exception as e:
-        print(f"Search error: {e}")
-        return []
+        print(f"⚠️  RapidAPI error: {e}")
+        return duckduckgo_search(query, num)
 
 def is_future_date(date_str):
     try:
