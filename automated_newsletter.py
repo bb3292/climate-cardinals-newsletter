@@ -12,21 +12,16 @@ import json
 from datetime import datetime, timedelta
 from pathlib import Path
 
-# Install dependencies
-try:
-    import requests
-    import pandas as pd
-    from bs4 import BeautifulSoup
-    from dateutil import parser
-    from ddgs import DDGS
-except ImportError:
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", 
-                          "requests", "beautifulsoup4", "lxml", "html5lib", "pandas", "python-dateutil", "duckduckgo-search"])
-    import requests
-    import pandas as pd
-    from bs4 import BeautifulSoup
-    from dateutil import parser
-    from ddgs import DDGS
+# Install dependencies first
+subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", 
+                      "requests", "beautifulsoup4", "lxml", "html5lib", "pandas", "python-dateutil", "duckduckgo-search"])
+
+# Now import
+import requests
+import pandas as pd
+from bs4 import BeautifulSoup
+from dateutil import parser
+from ddgs import DDGS
 
 import re
 import csv
